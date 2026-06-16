@@ -1,0 +1,70 @@
+# ====================
+# 核心：解决换行符问题（必须放在最前面！）
+# ====================
+* text=auto
+
+# ====================
+# Python 源码文件 (保留你模板的精细配置)
+# ====================
+*.pxd    text diff=python
+*.py     text diff=python
+*.py3    text diff=python
+*.pyw    text diff=python
+*.pyx    text diff=python
+*.pyz    text diff=python
+*.pyi    text diff=python
+
+# 显式确保 Python 文件使用 LF (与 * text=auto 配合，双重保险)
+*.py     text eol=lf
+*.pyi    text eol=lf
+
+# ====================
+# Python 二进制文件
+# ====================
+*.db     binary
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
+
+# ====================
+# Jupyter Notebook (强制 LF 避免 JSON diff 混乱)
+# ====================
+*.ipynb  text eol=lf
+
+# ====================
+# 补充：常见配置与数据文件 (增强可读性)
+# ====================
+*.json   text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.toml   text eol=lf
+*.txt    text eol=lf
+*.md     text eol=lf
+*.rst    text eol=lf
+*.css    text eol=lf
+*.js     text eol=lf
+*.html   text eol=lf
+requirements*.txt text eol=lf
+Dockerfile text eol=lf
+Makefile   text eol=lf
+*.sh       text eol=lf
+
+# ====================
+# 二进制文件 (扩展)
+# ====================
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.tar.gz binary
+*.whl    binary
+*.egg    binary
+*.so     binary
+*.dylib  binary
+*.dll    binary

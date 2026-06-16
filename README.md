@@ -1,5 +1,10 @@
 # yolo 工地目标检测
 
+tensorboard --logdir /runs 
+uv run train.py
+
+# Install or upgrade the ultralytics package from PyPI
+pip install ultralytics
 
 ## 数据集：
 > - https://universe.roboflow.com/fyp-rk465/fyp_mocsdataset/dataset/3

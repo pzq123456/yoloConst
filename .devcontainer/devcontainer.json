@@ -5,14 +5,14 @@
     },
     "runArgs": [
         "--gpus", "all",
-        // 必须开启 IPC 模式，否则多进程 DataLoader 会崩溃
         "--ipc=host",
-        // 生产环境级资源限制
         "--ulimit", "memlock=-1",
-        "--ulimit", "stack=67108864"
+        "--ulimit", "stack=67108864",
+        "--rm"
     ],
     "mounts": [
         "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "uv --version"
+    "postCreateCommand": "uv --version",
+    "shutdownAction": "stopContainer"
 }

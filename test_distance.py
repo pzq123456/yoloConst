@@ -4,17 +4,10 @@ from pathlib import Path
 
 def main():
     # 1. 配置路径
-    # model_path = Path(r"runs\detect\fyp_mocs\weights\best.pt")
-    # runs\detect\fyp_mocs_max\weights\best.pt
-    # model_path = Path(r"runs\detect\fyp_mocs_max\weights\best.pt")
-    # runs\detect\yolo26n_self_dataset\weights\best.pt
-    # model_path = Path(r"runs\detect\yolo26n_self_dataset\weights\best.pt")
-    # runs\detect\yolo26n_finetune\weights\best.pt
-    # model_path = Path(r"runs\detect\yolo26n_finetune-3\weights\best.pt")
-    # runs\detect\yolo26s_mocs\weights\best.pt
-    model_path = Path(r"runs\detect\yolo26s_mocs\weights\best.pt")
+    model_path = Path(r"model\best.pt")
+    # runs\detect\yolo26n_mocs\weights\best.pt
+    # model_path = Path(r"runs/detect/yolo26n_mocs/weights/best.pt")
     rtsp_url = "rtsp://118.140.130.26:8554/dahua1003362"
-
 
     # 2. 初始化模型
     model = YOLO(model_path)

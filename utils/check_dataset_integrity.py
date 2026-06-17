@@ -43,4 +43,4 @@ def check_integrity(root_dir):
 
 if __name__ == "__main__":
     # 指向你刚才整理好的 data6 目录
-    check_integrity("data5")
+    check_integrity("data7")

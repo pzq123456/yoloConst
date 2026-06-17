@@ -2,6 +2,7 @@
 
 tensorboard --logdir /runs 
 uv run train.py
+tar -xf data7.tar -C data7
 
 # Install or upgrade the ultralytics package from PyPI
 pip install ultralytics
@@ -45,3 +46,6 @@ uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu
 
 
 ## 自己准备第二份数据集
+
+equipment
+worker

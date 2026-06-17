@@ -6,14 +6,19 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     # 你的最优权重路径
-    model_path = os.path.join(current_dir, "runs/detect/fyp_mocs/weights/best.pt")
+    model_path = os.path.join(current_dir, "../model/best.pt")
+    # model\best.onnx
+    # model\best.onnx.data
+    # model\labels.txt
     
     # 需要推理的图片路径列表
     image_paths = [
-        os.path.join(current_dir, "test/image.png"),
-        os.path.join(current_dir, "test/image copy.png"),
-        os.path.join(current_dir, "test/image copy 2.png"),
-        os.path.join(current_dir, "test/image1.png"),
+        os.path.join(current_dir, "../test/image.png"),
+        os.path.join(current_dir, "../test/image copy.png"),
+        os.path.join(current_dir, "../test/image copy 2.png"),
+        os.path.join(current_dir, "../test/image copy 3.png"),
+        os.path.join(current_dir, "../test/image1.png"),
+
     ]
 
     # 2. 加载模型
@@ -28,7 +33,6 @@ def main():
         source=image_paths, 
         save=True,          
         conf=0.3,          
-        imgsz=416,          # 建议设为你训练时使用的 imgsz
     )
 
     # 4. 打印推理结果简单信息

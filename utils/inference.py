@@ -6,7 +6,7 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     # 你的最优权重路径
-    model_path = os.path.join(current_dir, "../model/best.pt")
+    model_path = os.path.join(current_dir, "../model/yolo26s_mocs.pt")
     # model\best.onnx
     # model\best.onnx.data
     # model\labels.txt

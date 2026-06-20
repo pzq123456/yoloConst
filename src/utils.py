@@ -2,7 +2,6 @@
 import cv2
 import numpy as np
 import queue
-import time
 
 def draw_foot_ellipse(frame, foot_point, bbox=None, color=(0, 255, 0), 
                       alpha=0.3, radius=None, person_height=None):
@@ -77,30 +76,6 @@ def compute_bev(frame, M, bev_size):
     """
     return cv2.warpPerspective(frame, M, bev_size)
 
-# utils.py
-def update_grid(grid_map, detections, grid_size, decay=0.95):
-    """
-    更新占用网格
-    detections: list of (points_list, color)
-        points_list: 包含一个或多个点 [(x1,y1), (x2,y2), ...]
-        color: (B,G,R)
-    """
-    cv2.addWeighted(grid_map, decay, np.zeros_like(grid_map), 1 - decay, 0, grid_map)
-    h, w = grid_map.shape[:2]
-    
-    for points, color in detections:
-        # 如果points是单个点的列表，占用一个网格
-        # 如果是多个点，每个点占用一个网格（车辆占用多个网格）
-        for point in points:
-            if len(point) == 2:
-                px, py = point
-                px = np.clip(int(px), 0, w - 1)
-                py = np.clip(int(py), 0, h - 1)
-                gx = (px // grid_size) * grid_size
-                gy = (py // grid_size) * grid_size
-                gx = min(gx, w - grid_size)
-                gy = min(gy, h - grid_size)
-                cv2.rectangle(grid_map, (gx, gy), (gx + grid_size, gy + grid_size), color, -1)
 
 def draw_src_region(frame, src_pts):
     """
@@ -124,32 +99,17 @@ def draw_bev_grid_overlay(bev_img, grid_size, color=(128, 128, 128)):
         cv2.line(bev_img, (0, y), (w, y), color, 1)
     return bev_img
 
-def point_segment_distance(p, a, b):
-    """
-    计算点p到线段ab的最短欧氏距离（像素）
-    """
-    px, py = p
-    ax, ay = a
-    bx, by = b
-    vx, vy = bx - ax, by - ay
-    wx, wy = px - ax, py - ay
-    c1 = wx * vx + wy * vy
-    if c1 <= 0:
-        return np.hypot(px - ax, py - ay)
-    c2 = vx * vx + vy * vy
-    if c2 <= c1:
-        return np.hypot(px - bx, py - by)
-    ratio = c1 / c2
-    proj_x = ax + ratio * vx
-    proj_y = ay + ratio * vy
-    return np.hypot(px - proj_x, py - proj_y)
-
-def video_reader(cap, frame_queue):
+def video_reader(cap, frame_queue, stop_event=None):
     """
     视频读取线程
     """
     while cap.isOpened():
-        ret, frame = cap.read()
+        if stop_event and stop_event.is_set():
+            break
+        try:
+            ret, frame = cap.read()
+        except Exception:
+            break  # 网络断开或流异常时优雅退出
         if not ret:
             break
         if frame_queue.full():
@@ -159,19 +119,6 @@ def video_reader(cap, frame_queue):
                 pass
         frame_queue.put(frame)
 
-def compute_fps(fps_counter, fps_timer):
-    """
-    计算FPS
-    """
-    fps_counter += 1
-    current_time = time.time()
-    if current_time - fps_timer >= 1.0:
-        fps_display = f"FPS: {fps_counter:.1f}"
-        fps_counter = 0
-        fps_timer = current_time
-        return fps_display, fps_counter, fps_timer
-    return None, fps_counter, fps_timer
-
 def draw_fps_on_image(img, fps_display, position=(10, 30)):
     """
     在图像上绘制FPS
@@ -180,33 +127,3 @@ def draw_fps_on_image(img, fps_display, position=(10, 30)):
         cv2.putText(img, fps_display, position,
                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
     return img
-
-# utils.py 添加以下函数
-
-def point_in_rectangle(point, rect):
-    """
-    判断点是否在矩形内
-    
-    参数:
-        point: (x, y)
-        rect: (x1, y1, x2, y2)
-    """
-    px, py = point
-    x1, y1, x2, y2 = rect
-    return x1 <= px <= x2 and y1 <= py <= y2
-
-def points_to_bbox(points):
-    """
-    将点列表转换为边界框
-    
-    参数:
-        points: [(x1,y1), (x2,y2), ...]
-    
-    返回:
-        (x1, y1, x2, y2)
-    """
-    if not points:
-        return None
-    xs = [p[0] for p in points]
-    ys = [p[1] for p in points]
-    return (min(xs), min(ys), max(xs), max(ys))

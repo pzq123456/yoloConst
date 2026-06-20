@@ -25,7 +25,7 @@ def main():
     bev_processor = BEVProcessor(config)
     detection_processor = DetectionProcessor(config)
     alarm_manager = AlarmManager(config)
-    display_manager = DisplayManager()
+    display_manager = DisplayManager(show_bev=config.DEBUG_MODE)
     fps_manager = FPSManager()
     
     # 4. 初始化帧处理器

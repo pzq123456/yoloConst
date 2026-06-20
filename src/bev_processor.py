@@ -22,15 +22,3 @@ class BEVProcessor:
                     (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
         return bev_with_grid
     
-    def draw_reference_square(self, bev_img, center_x, center_y, square_size):
-        """在BEV图像上绘制参考正方形"""
-        square_pts = np.array([
-            [center_x - square_size/2, center_y - square_size/2],
-            [center_x + square_size/2, center_y - square_size/2],
-            [center_x + square_size/2, center_y + square_size/2],
-            [center_x - square_size/2, center_y + square_size/2]
-        ], dtype=np.float32)
-        square_reshaped = square_pts.reshape(-1, 1, 2)
-        bev_square = cv2.perspectiveTransform(square_reshaped, self.M).reshape(-1, 2)
-        cv2.polylines(bev_img, [bev_square.astype(np.int32)], True, (255, 0, 0), 3)
-        return bev_square

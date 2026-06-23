@@ -1,7 +1,6 @@
 # frame_processor.py
 import numpy as np
 from grid_manager import GridManager
-from utils import draw_src_region
 
 class FrameProcessor:
     """帧处理器 — 工地人-设备距离报警管线"""
@@ -24,7 +23,6 @@ class FrameProcessor:
 
         # 2. 绘制原始图像
         annotated_frame = results[0].plot()
-        annotated_frame = draw_src_region(annotated_frame, self.config.SRC_PTS)
 
         # 3. BEV（debug用）
         bev_img = self.bev_processor.process(frame)
@@ -44,9 +42,8 @@ class FrameProcessor:
         # 7. 报警防抖
         alarm_triggered = self.alarm_manager.update(global_risk)
 
-        # 8. 标注：风险色椭圆 + 摄像机边框
+        # 8. 标注：风险色椭圆
         self.detection_processor.annotate_frame(annotated_frame, person_data, risks, alarm_triggered)
-        self.alarm_manager.draw_camera_overlay(annotated_frame, alarm_triggered, global_risk)
 
         # 9. 网格显示
         display_grid = self.grid_manager.get_display_grid()

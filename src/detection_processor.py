@@ -33,8 +33,9 @@ class DetectionProcessor:
         if results[0].boxes.id is not None:
             boxes = results[0].boxes.xyxy.cpu().numpy()
             clss = results[0].boxes.cls.cpu().numpy().astype(int)
+            confs = results[0].boxes.conf.cpu().numpy()
 
-            for box, cls in zip(boxes, clss):
+            for box, cls, conf in zip(boxes, clss, confs):
                 x1, y1, x2, y2 = box
                 foot_mid = [(x1 + x2) / 2, y2]
 
@@ -43,7 +44,7 @@ class DetectionProcessor:
                     pts_img = np.array([foot_mid], dtype=np.float32).reshape(-1, 1, 2)
                     pts_bev = cv2.perspectiveTransform(pts_img, self.M).reshape(-1, 2)
 
-                    detections.append((pts_bev.tolist(), color))
+                    detections.append(([(float(pts_bev[0][0]), float(pts_bev[0][1]), float(conf))], color))
                     person_points.append(tuple(pts_bev[0]))
                     person_data.append({
                         'bbox': box,
@@ -64,7 +65,7 @@ class DetectionProcessor:
                     for cell_x, cell_y in self._get_grid_cells_in_bbox(
                         min_x, min_y, max_x, max_y, self.config.GRID_SIZE
                     ):
-                        detections.append(([(cell_x, cell_y)], color))
+                        detections.append(([(cell_x, cell_y, float(conf))], color))
 
         return person_points, vehicle_areas, detections, person_data
 

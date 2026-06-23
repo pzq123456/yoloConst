@@ -101,17 +101,29 @@ def draw_bev_grid_overlay(bev_img, grid_size, color=(128, 128, 128)):
 
 def video_reader(cap, frame_queue, stop_event=None):
     """
-    视频读取线程
+    视频读取线程（鲁棒版）
+    - 捕获 C 层崩溃（ffmpeg assertion 等）
+    - 跳过零星坏帧；连续坏帧过多则退出
     """
+    bad_streak = 0
+    MAX_BAD_STREAK = 10  # 连续 10 帧坏 → 流已死，退出
+
     while cap.isOpened():
         if stop_event and stop_event.is_set():
             break
         try:
             ret, frame = cap.read()
-        except Exception:
-            break  # 网络断开或流异常时优雅退出
-        if not ret:
+        except BaseException:
             break
+
+        if not ret or frame is None or frame.size == 0:
+            bad_streak += 1
+            if bad_streak >= MAX_BAD_STREAK:
+                break
+            continue
+
+        bad_streak = 0
+
         if frame_queue.full():
             try:
                 frame_queue.get_nowait()

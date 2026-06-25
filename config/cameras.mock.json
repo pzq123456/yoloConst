@@ -1,0 +1,28 @@
+[
+  {
+    "camera_id": "371",
+    "camera_name": "Camera 371",
+    "rtsp_url": "rtsp://118.140.130.26:8554/dahua1005189",
+    "resolution": { "width": 1920, "height": 1080 },
+    "calibration": {
+      "H": [
+        [0.070225414208138, -0.8904756973923279, 276.5988636371749],
+        [-0.25379779760037646, -0.003080972279724582, 350.81376822009275],
+        [-0.00013975356604996325, -0.05671165189373006, 1.0]
+      ],
+      "world_mean": [812844.6875, 817636.1875]
+    },
+    "alarm_push_url": null,
+    "grid": {
+      "cell_size_m": 0.5,
+      "x_range_m": 40.0,
+      "y_near_m": -5.0,
+      "y_far_m": 30.0
+    },
+    "risk": {
+      "equipment_danger_radius_m": 3.0,
+      "alarm_continuous_frames": 3,
+      "alarm_risk_threshold": 0.15
+    }
+  }
+]

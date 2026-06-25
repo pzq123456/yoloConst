@@ -11,17 +11,18 @@ from video_stream import VideoStream
 from frame_processor import FrameProcessor
 from display_manager import DisplayManager
 from fps_manager import FPSManager
-from utils import compute_bev_size
 
 
 def main():
-    # 1. 初始化配置
+    # 1. 初始化配置 + 加载标定
     config = Config()
-
-    # 2. 计算BEV尺寸
-    bev_w, bev_h = compute_bev_size(config.SRC_PTS, config.BEV_SCALE)
-    print(f"BEV尺寸: {bev_w}x{bev_h}")
-    config.initialize_bev(bev_w, bev_h)
+    config.initialize_calib()
+    print(f"标定加载: H矩阵已就绪, world_mean={config.WORLD_MEAN}")
+    print(f"物理网格: {config.GRID_COLS}x{config.GRID_ROWS} cells"
+          f" @ {config.GRID_CELL_SIZE_M}m/cell"
+          f" | 覆盖 cam_y∈[{config.GRID_Y_NEAR_M:.0f},{config.GRID_Y_FAR_M:.0f}]m"
+          f" ±{config.GRID_X_RANGE_M/2:.0f}m")
+    print(f"BEV尺寸: {config.BEV_W}x{config.BEV_H} px")
 
     # 3. 初始化各个模块
     model = YOLO(config.MODEL_PATH)

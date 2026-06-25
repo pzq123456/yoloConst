@@ -1,11 +1,15 @@
 # frame_processor.py
 import numpy as np
 from grid_manager import GridManager
+from utils import (draw_camera_perspective_grid, draw_occupancy_overlay,
+                   draw_grid_coordinates)
+
 
 class FrameProcessor:
-    """帧处理器 — 工地人-设备距离报警管线"""
+    """帧处理器 — 工地人-设备距离报警管线（相机对齐坐标系）"""
 
-    def __init__(self, config, model, bev_processor, detection_processor, alarm_manager):
+    def __init__(self, config, model, bev_processor,
+                 detection_processor, alarm_manager):
         self.config = config
         self.model = model
         self.bev_processor = bev_processor
@@ -21,17 +25,24 @@ class FrameProcessor:
             imgsz=self.config.IMGSZ, iou=0.5,
         )
 
-        # 2. 绘制原始图像
+        # 2. 绘制原始图像 + 标定透视网格叠加
         annotated_frame = results[0].plot()
+        draw_camera_perspective_grid(
+            annotated_frame,
+            self.config.H_inv, self.config.WORLD_MEAN,
+            self.config.CAM_FORWARD, self.config.CAM_RIGHT,
+            self.config.CAM_ORIGIN_WORLD,
+            grid_cell_m=self.config.GRID_CELL_SIZE_M,
+        )
 
         # 3. BEV（debug用）
         bev_img = self.bev_processor.process(frame)
 
-        # 4. 提取BEV坐标（不绘制）
+        # 4. 提取相机对齐坐标（基于标定 H 矩阵）
         person_points, vehicle_areas, detections, person_data = \
-            self.detection_processor.extract_bev_coordinates(results)
+            self.detection_processor.extract_world_coordinates(results)
 
-        # 5. 更新网格 + 计算风险
+        # 5. 更新占用网格 + 计算风险
         self.grid_manager.update(detections)
         danger_map = self.grid_manager.get_danger_map()
         global_risk = float(danger_map.max())
@@ -42,12 +53,15 @@ class FrameProcessor:
         # 7. 报警防抖
         alarm_triggered = self.alarm_manager.update(global_risk)
 
-        # 8. 标注：风险色椭圆
-        self.detection_processor.annotate_frame(annotated_frame, person_data, risks, alarm_triggered)
+        # 8. 视频画面叠加半透明占用网格（替代原来的椭圆绘制）
+        draw_occupancy_overlay(annotated_frame, self.grid_manager, self.config)
 
-        # 9. 网格显示
+        # 9. 网格显示（BEV 像素分辨率）+ 坐标系叠加
         display_grid = self.grid_manager.get_display_grid()
-        self.alarm_manager.draw_grid_overlay(display_grid, alarm_triggered, global_risk)
+        draw_grid_coordinates(display_grid, self.config)
+        self.alarm_manager.draw_grid_overlay(
+            display_grid, alarm_triggered, global_risk,
+        )
 
         return {
             'annotated_frame': annotated_frame,
@@ -56,11 +70,16 @@ class FrameProcessor:
         }
 
     def _sample_risks(self, danger_map, person_data):
+        """从 danger_map 采样每个人员的风险值"""
         risks = []
-        h, w = danger_map.shape
+        rows, cols = danger_map.shape
+        cfg = self.config
+
         for pd_ in person_data:
-            px, py = pd_['foot_bev']
-            ix = int(np.clip(px, 0, w - 1))
-            iy = int(np.clip(py, 0, h - 1))
-            risks.append(float(danger_map[iy, ix]))
+            cam_x, cam_y = pd_['foot_cam']
+            col = cfg.cam_to_grid_col(cam_x)
+            row = cfg.cam_to_grid_row(cam_y)
+            col = max(0, min(cols - 1, col))
+            row = max(0, min(rows - 1, row))
+            risks.append(float(danger_map[row, col]))
         return risks
